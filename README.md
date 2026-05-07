@@ -1,7 +1,49 @@
 # sre-news-agent
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.1.2`
+An AI-powered SRE news assistant that aggregates the latest articles across security, cloud platforms, observability, incident management, and the broader SRE community — all in one daily digest.
+
+Built with [Google ADK](https://adk.dev/) and deployed on Google Cloud Run.
+
+## News Sources
+
+The agent pulls from **12 RSS feeds** across 5 categories:
+
+### Security
+| Source | What it covers |
+|--------|---------------|
+| [Cloudflare Blog](https://blog.cloudflare.com) | Network security, DDoS, threat intelligence |
+| [AWS Security Blog](https://aws.amazon.com/blogs/security/) | AWS-specific security announcements and best practices |
+| [The Hacker News](https://thehackernews.com) | CVEs, breaches, zero-days, malware |
+
+### Cloud Platforms
+| Source | What it covers |
+|--------|---------------|
+| [Google Cloud Blog](https://cloud.google.com/blog) | GCP product updates and releases |
+| [Azure Updates](https://azure.microsoft.com/en-us/updates/) | Azure service announcements |
+| [AWS What's New](https://aws.amazon.com/new/) | New AWS features and services |
+
+### Observability
+| Source | What it covers |
+|--------|---------------|
+| [Grafana Blog](https://grafana.com/blog/) | Grafana, Loki, Tempo, Mimir updates |
+| [OpenTelemetry Blog](https://opentelemetry.io/blog/) | OTel specs, SDKs, and community news |
+
+### Incident Management
+| Source | What it covers |
+|--------|---------------|
+| [PagerDuty Blog](https://www.pagerduty.com/blog/) | On-call, incident response practices |
+| [Last9 Blog](https://last9.io/blog/) | Reliability engineering, SLOs |
+| [Squadcast Blog](https://www.squadcast.com/blog/) | Incident management, runbooks |
+
+### SRE Community
+| Source | What it covers |
+|--------|---------------|
+| [CNCF Blog](https://www.cncf.io/blog/) | Kubernetes, Prometheus, cloud-native ecosystem |
+| [InfoQ DevOps](https://www.infoq.com/devops/) | Platform engineering, DevOps practices |
+| [SRE Weekly](https://sreweekly.com) | Curated SRE articles and postmortems |
+| [Reddit r/sre](https://www.reddit.com/r/sre/) | Community discussions and links |
+
+---
 
 ## Project Structure
 
