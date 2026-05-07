@@ -43,7 +43,7 @@ def _is_security_related(title: str, summary: str) -> bool:
 
 def _fetch_feed(url: str, source_name: str, security_filter: bool = True) -> list[dict]:
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (compatible; DailyNewsBot/1.0)"}
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; SRENewsAgent/1.0)"}
         response = requests.get(url, headers=headers, timeout=15)
         feed = feedparser.parse(response.content)
         cutoff = datetime.now(timezone.utc) - timedelta(days=7)
@@ -68,7 +68,7 @@ def _fetch_feed(url: str, source_name: str, security_filter: bool = True) -> lis
 
 def _format_articles(articles: list[dict]) -> str:
     if not articles:
-        return "No security-related articles found."
+        return "No articles found."
     lines = []
     for a in articles:
         if "error" in a:
@@ -121,26 +121,137 @@ def get_hacker_news_security_news() -> str:
     articles = _fetch_feed(
         "https://feeds.feedburner.com/TheHackersNews",
         "The Hacker News",
-        security_filter=False,  # The Hacker News is already security-focused
+        security_filter=False,
     )
     return _format_articles(articles)
 
 
+def get_cloud_platform_news() -> str:
+    """Fetches the latest news from GCP, Azure, and AWS What's New.
+
+    Returns:
+        A formatted string of recent cloud platform updates and announcements.
+    """
+    results = []
+    results.extend(_fetch_feed(
+        "https://feeds.feedburner.com/TheGoogleCloudPlatformBlog",
+        "Google Cloud Blog",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://azurecomcdn.azureedge.net/en-us/updates/feed/",
+        "Azure Updates",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://aws.amazon.com/about-aws/whats-new/recent/feed/",
+        "AWS What's New",
+        security_filter=False,
+    ))
+    return _format_articles(results)
+
+
+def get_observability_news() -> str:
+    """Fetches the latest news from Grafana and OpenTelemetry blogs.
+
+    Returns:
+        A formatted string of recent observability news and updates.
+    """
+    results = []
+    results.extend(_fetch_feed(
+        "https://grafana.com/blog/index.xml",
+        "Grafana Blog",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://opentelemetry.io/blog/index.xml",
+        "OpenTelemetry Blog",
+        security_filter=False,
+    ))
+    return _format_articles(results)
+
+
+def get_incident_management_news() -> str:
+    """Fetches the latest news from incident management platforms: PagerDuty, Last9, and Squadcast.
+
+    Returns:
+        A formatted string of recent incident management news and best practices.
+    """
+    results = []
+    results.extend(_fetch_feed(
+        "https://www.pagerduty.com/blog/feed/",
+        "PagerDuty Blog",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://last9.io/blog/rss.xml",
+        "Last9 Blog",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://www.squadcast.com/blog/rss.xml",
+        "Squadcast Blog",
+        security_filter=False,
+    ))
+    return _format_articles(results)
+
+
+def get_sre_community_news() -> str:
+    """Fetches the latest SRE and platform engineering news from CNCF, InfoQ DevOps, SRE Weekly, and Reddit r/sre.
+
+    Returns:
+        A formatted string of recent SRE community articles and discussions.
+    """
+    results = []
+    results.extend(_fetch_feed(
+        "https://www.cncf.io/feed/",
+        "CNCF Blog",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://feed.infoq.com/devops/",
+        "InfoQ DevOps",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://sreweekly.com/feed/",
+        "SRE Weekly",
+        security_filter=False,
+    ))
+    results.extend(_fetch_feed(
+        "https://www.reddit.com/r/sre.rss",
+        "Reddit r/sre",
+        security_filter=False,
+    ))
+    return _format_articles(results)
+
+
 root_agent = Agent(
-    name="daily_security_news_agent",
+    name="sre_news_agent",
     model=Gemini(
         model="gemini-flash-latest",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=(
-        "You are a daily security news assistant. When asked for news, call all three tools "
-        "(get_cloudflare_security_news, get_aws_security_news, get_hacker_news_security_news) "
-        "to gather articles, then present a clean, organized digest. "
-        "Group articles by source. For each article include the title, published date, URL, and a brief summary. "
-        "Highlight any critical vulnerabilities, zero-days, or major incidents prominently. "
+        "You are an SRE news assistant. When asked for news, call the relevant tools based on the topic requested. "
+        "For a full digest, call all tools: get_cloudflare_security_news, get_aws_security_news, "
+        "get_hacker_news_security_news, get_cloud_platform_news, get_observability_news, "
+        "get_incident_management_news, and get_sre_community_news. "
+        "Present a clean, organized digest grouped by category: Security, Cloud Platforms, "
+        "Observability, Incident Management, and SRE Community. "
+        "For each article include the title, published date, URL, and a brief summary. "
+        "Highlight any critical vulnerabilities, outages, zero-days, or major incidents prominently. "
         "Keep your tone concise and professional."
     ),
-    tools=[get_cloudflare_security_news, get_aws_security_news, get_hacker_news_security_news],
+    tools=[
+        get_cloudflare_security_news,
+        get_aws_security_news,
+        get_hacker_news_security_news,
+        get_cloud_platform_news,
+        get_observability_news,
+        get_incident_management_news,
+        get_sre_community_news,
+    ],
 )
 
 app = App(
